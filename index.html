@@ -18,8 +18,9 @@
     under the License.
 -->
 <html>
-  <head>
-    <!--
+
+<head>
+  <!--
         Customize this policy to fit your own app's needs. For more guidance, see:
             https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
         Some notes:
@@ -28,29 +29,24 @@
             * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
                 * Enable inline JS: add 'unsafe-inline' to default-src
         -->
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="msapplication-tap-highlight" content="no" />
-    <meta
-      name="viewport"
-      content="initial-scale=1, width=device-width, viewport-fit=cover"
-    />
-    <link rel="stylesheet" type="text/css" href="css/style.css" />
-    <!-- Load d3.js
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover" />
+  <link rel="stylesheet" type="text/css" href="css/style.css" />
+ <!--  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script> -->
+ <script type="text/javascript" src="https://d3js.org/d3.v7.min.js"></script>
+  <script type="text/javascript" src="js/index.js"></script>
+  <!-- Load d3.js
     <script src="https://d3js.org/d3.v4.js"></script> -->
-    <title>Image to Text to Speech</title>
-  </head>
+  <title>Image to Text to Speech</title>
+</head>
 
-  <body>
-    <div id="div-wrapper">
-      <div id="header">
-        <h3 id="headerTitle">Shopee Variants</h3>
-      </div>
-     
-      <div id="content">
-         
-      </div>
-    </div>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script type="text/javascript" src="js/index.js"></script>
-  </body>
+<body>
+
+  <svg>
+
+  </svg>
+ 
+</body>
+
 </html>
