@@ -38,13 +38,23 @@
   <script type="text/javascript" src="js/index.js"></script>
   <!-- Load d3.js
     <script src="https://d3js.org/d3.v4.js"></script> -->
-  <title>Image to Text to Speech</title>
+  <title>Shopee Shop Rating Scraper</title>
 </head>
 
 <body>
 <div>
+  <div id="header">
+    <div id="div-header">
+      <label id="headerTitle">Shopee Shop Rating Scraper</label>
+    </div>
+    <div id="div-showhelp">
+      <button id="btnHelp" onclick="showModal()">How to use</button>
+    </div>
+    
+  </div>
+  <br>
   <form  onsubmit="plotData();return false">
-    <input type="url" id="url" style="width: 70%;" required placeholder="Paste the link here"/>
+    <input type="url" id="url" style="width: 80%;" required placeholder="Paste the link here"/>
     <!-- <input type="number" max="500" style="width: 10%;" required placeholder="No. of batch"> -->
     <input type="submit" id="btnPlot" value="Plot Data" style="width: 10%;"/>
   </form>
@@ -54,6 +64,10 @@
 
   </svg> 
  
+  <div id="modal-help">
+     This is modal
+  </div>
+  
 </body>
 
 </html>

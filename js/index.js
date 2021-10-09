@@ -1,68 +1,95 @@
-//https://www.tutorialsteacher.com/d3js/create-svg-chart-in-d3js
+//get the value in the input boz
 
-let batchnum = 100;
+let form = document.getElementById("plotGraphForm");
 
-let allRatings = [];
-let data = [];
-let w = window.innerWidth, h = window.innerHeight;
-let margin = {top: 20, right: 20, bottom: h/2, left: 40};
+function plotData() {
+  let txtUrl = document.getElementById("url");
+  let url = txtUrl.value
+  let startChar = url.search("-i.")+3
+  let endChar = startChar.length
+  let spliceWord = url.slice(startChar,endChar)
+  //split the splice word
+  let idArr = spliceWord.split(".")
 
-let height = h- margin.top- margin.bottom, width = w - margin.left - margin.right;
-for (let i = 0; i < batchnum; ++i) {
-  //setTimeout(async function (y) {
-  fetch(
-    `https://shopee-ratings-variants.herokuapp.com/23558781/7660245788/${i}`
-  )
-    .then((response) => response.json())
-    .then((rawdata) => {
-      allRatings.push(...rawdata);
-      //console.log(i + allRatings)
-      data = allRatings.reduce(function (Ratings, rating) {
-        if (rating in Ratings) {
-          Ratings[rating]++;
-        } else {
-          Ratings[rating] = 1;
+  let shopId =Number(idArr[0]) 
+  let productId =Number(idArr[1]) 
+  console.log(productId);
+
+
+  //https://www.tutorialsteacher.com/d3js/create-svg-chart-in-d3js
+
+  let batchnum = 500;
+
+  let allRatings = [];
+  let data = [];
+  let w = window.innerWidth,
+    h = window.innerHeight;
+  let margin = { top: 20, right: 20, bottom: h / 2, left: 40 };
+
+  let height = h - margin.top - margin.bottom,
+    width = w - margin.left - margin.right;
+  for (let i = 0; i < batchnum; ++i) {
+    //setTimeout(async function (y) {
+    fetch(
+      `https://shopee-ratings-variants.herokuapp.com/${shopId}/${productId}/${i}`
+    )
+      .then((response) => response.json())
+      .then((rawdata) => {
+        if (rawdata.length == 0) {
+          //when there no data end
+          //i=batchnum
+          //console.log(i)
+          return;
         }
 
-        return Ratings;
-      }, {});
-      //console.log(data)
-      //labels: Object.keys(data)
-      let dataset = Object.values(data);
-      let sourceNames = Object.keys(data);
-      let mod = i % 2;
+        allRatings.push(...rawdata);
 
-      if (mod != 0) {
-        //Create SVG element
-        // xScale will help us set the x position of the bars
+        data = allRatings.reduce(function (Ratings, rating) {
+          if (rating in Ratings) {
+            Ratings[rating]++;
+          } else {
+            Ratings[rating] = 1;
+          }
 
-        let xScale = d3.scaleBand().rangeRound([0, width]).padding(0.1),
-          yScale = d3.scaleLinear().rangeRound([height, 0]);
+          return Ratings;
+        }, {});
+        //console.log(data)
+        //labels: Object.keys(data)
+        let dataset = Object.values(data);
+        let sourceNames = Object.keys(data);
+        let mod = i % 2;
 
-        xScale.domain(sourceNames);
-        yScale.domain([
-          0,
-          d3.max(dataset, function (d) {
-            return d;
-          }),
-        ]);
+        if (mod != 0) {
+          //Create SVG element
+          // xScale will help us set the x position of the bars
 
-        d3.select("svg").remove();
+          let xScale = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+            yScale = d3.scaleLinear().rangeRound([height, 0]);
 
-        svg = d3
-          .select("body")
-          .append("svg")
-          .attr("width", w)
-          .attr("height", h);
-        //const svg = d3.select("svg").attr("width", w).attr("height", h);
-        svg = svg
-          .append("g")
-          .attr(
-            "transform",
-            "translate(" + margin.left + "," + margin.top + ")"
-          );
+          xScale.domain(sourceNames);
+          yScale.domain([
+            0,
+            d3.max(dataset, function (d) {
+              return d;
+            }),
+          ]);
 
-/*          svg
+          d3.select("svg").remove();
+
+          svg = d3
+            .select("body")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h);
+          //const svg = d3.select("svg").attr("width", w).attr("height", h);
+          svg = svg
+            .append("g")
+            .attr(
+              "transform",
+              "translate(" + margin.left + "," + margin.top + ")"
+            );
+
+          /*          svg
           .append("g")
           .attr("class", "axis axis--x")
           .attr("transform", "translate(0," + height + ")")
@@ -71,80 +98,83 @@ for (let i = 0; i < batchnum; ++i) {
 
  */
 
-        svg
-          .append("g")
-          .attr("class", "axis axis--y")
-          .call(d3.axisLeft(yScale).ticks(5));
+          svg
+            .append("g")
+            .attr("class", "axis axis--y")
+            .call(d3.axisLeft(yScale).ticks(5));
 
-        // Create rectangles
-        let bars = svg.selectAll(".bar").data(sourceNames).enter().append("g");
-
-        bars
-          .append("rect")
-          .attr("class", "bar")
-          .attr("x", function (d) {
-            return xScale(d);
-          })
-          .attr("y", function (d) {
-            return yScale(data[d]);
-          })
-          .attr("width", xScale.bandwidth())
-          .attr("height", function (d) {
-            return height - yScale(data[d]);
-          });
-
-        bars
-          .append("text")
-          .text(function (d) {
-            return data[d];
-          })
-          .attr("x", function (d) {
-            return xScale(d) + xScale.bandwidth() / 2;
-          })
-          .attr("y", function (d) {
-            return yScale(data[d]) - 5;
-          })
-          .attr("font-family", "sans-serif")
-          .attr("font-size", "14px")
-          .attr("fill", "black")
-          .attr("text-anchor", "middle");
+          // Create rectangles
+          let bars = svg
+            .selectAll(".bar")
+            .data(sourceNames)
+            .enter()
+            .append("g");
 
           bars
-          .append("text")
-          .text(function (d) {
-            //console.log(d)
-            return d;
-          })
-          .attr("transform", "translate(0," + width + "), rotate(270) ")
-          .attr("x", function (d) {
-            return h/2;
-          })
-          .attr("y", function (d) {
-            
-            return xScale(d) + xScale.bandwidth() / 2;
-            
-          })
-          
-          .attr("font-family", "sans-serif")
-          .attr("font-size", "14px")
-          .attr("fill", "black")
-          .attr("text-anchor", "start");
+            .append("rect")
+            .attr("class", "bar")
+            .attr("x", function (d) {
+              return xScale(d);
+            })
+            .attr("y", function (d) {
+              return yScale(data[d]);
+            })
+            .attr("width", xScale.bandwidth())
+            .attr("height", function (d) {
+              return height - yScale(data[d]);
+            });
 
-      }
-      //console.log(i)
-      //console.log(data)
-    })
-    .catch(function (error) {
-      // if there's an error, log it
-      console.log(error);
-    });
-  // }, 300); // we're passing x
+          bars
+            .append("text")
+            .text(function (d) {
+              return data[d];
+            })
+            .attr("x", function (d) {
+              return xScale(d) + xScale.bandwidth() / 2;
+            })
+            .attr("y", function (d) {
+              return yScale(data[d]) - 5;
+            })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "12px")
+            .attr("fill", "black")
+            .attr("text-anchor", "middle");
+
+          bars
+            .append("text")
+            .text(function (d) {
+              //console.log(d)
+              return d;
+            })
+            .attr("transform", "translate(0," + width + "), rotate(270) ")
+            .attr("x", height)
+            .attr("y", function (d) {
+              return xScale(d) + xScale.bandwidth() / 2;
+            })
+
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "14px")
+            .attr("fill", "black")
+            .attr("text-anchor", "end");
+        }
+        //console.log(i)
+        //console.log(data)
+      })
+      .catch(function (error) {
+        // if there's an error, log it
+        console.log(error);
+      });
+    // }, 300); // we're passing x
+  }
 }
 
 
+function showModal() {
+  let modalHelp = document.getElementById("modal-help")
+  modalHelp.style.display="block"
+}
 
-
-    /**working
+/**working
        xScale = d3
             .scaleBand() //Ordinal scale
             .domain(d3.range(dataset.length)) //sets the input domain for the scale
