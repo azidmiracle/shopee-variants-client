@@ -42,10 +42,17 @@
 </head>
 
 <body>
+<div>
+  <form  onsubmit="plotData();return false">
+    <input type="url" id="url" style="width: 70%;" required placeholder="Paste the link here"/>
+    <!-- <input type="number" max="500" style="width: 10%;" required placeholder="No. of batch"> -->
+    <input type="submit" id="btnPlot" value="Plot Data" style="width: 10%;"/>
+  </form>
+</div>
 
   <svg>
 
-  </svg>
+  </svg> 
  
 </body>
 
