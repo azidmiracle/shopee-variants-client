@@ -3,234 +3,205 @@
 let form = document.getElementById("plotGraphForm");
 
 function plotData() {
+  //showLoadingModal()
   let txtUrl = document.getElementById("url");
-  let url = txtUrl.value
-  let startChar = url.search("-i.")+3
-  let endChar = startChar.length
-  let spliceWord = url.slice(startChar,endChar)
+  let txtTop = document.getElementById("top");
+  let dropSort = document.getElementById("sortType");
+  let url = txtUrl.value;
+  let topItems = Number(txtTop.value);
+  let sortType = dropSort.value;
+  let startChar = url.search("-i.") + 3;
+  let endChar = startChar.length;
+  let spliceWord = url.slice(startChar, endChar);
   //split the splice word
-  let idArr = spliceWord.split(".")
+  let idArr = spliceWord.split(".");
 
-  let shopId =Number(idArr[0]) 
-  let productId =Number(idArr[1]) 
-  console.log(productId);
+  let shopId = Number(idArr[0]);
+  let productId = Number(idArr[1]);
+  console.log(topItems);
 
+  //fetch the number of ratings
+  fetch(
+    `https://shopee-ratings-variants.herokuapp.com/count/${shopId}/${productId}/`
+  )
+    .then((response) => response.json())
+    .then((count) => {
+      let batchnum = Math.round(count / 50); // the limit per batch in the server is 50
 
-  //https://www.tutorialsteacher.com/d3js/create-svg-chart-in-d3js
+      let allRatings = [];
+      let data = [];
+      let w = window.innerWidth,
+        h = window.innerHeight;
+      let margin = { top: 20, right: 20, bottom: h / 2, left: 40 };
 
-  let batchnum = 500;
+      let height = h - margin.top - margin.bottom,
+        width = w - margin.left - margin.right;
 
-  let allRatings = [];
-  let data = [];
-  let w = window.innerWidth,
-    h = window.innerHeight;
-  let margin = { top: 20, right: 20, bottom: h / 2, left: 40 };
+      for (let i = 0; i < batchnum + 1; ++i) {
+        //setTimeout(async function (y) {
+        fetch(
+          `https://shopee-ratings-variants.herokuapp.com/ratings/${shopId}/${productId}/${i}`
+        )
+          .then((response) => response.json())
+          .then((rawdata) => {
+            allRatings.push(...rawdata);
+            
+            //create object
+            data = allRatings.reduce(function (Ratings, rating) {
+              if (rating in Ratings) {
+                Ratings[rating]++;
+              } else {
+                Ratings[rating] = 1;
+              }
 
-  let height = h - margin.top - margin.bottom,
-    width = w - margin.left - margin.right;
-  for (let i = 0; i < batchnum; ++i) {
-    //setTimeout(async function (y) {
-    fetch(
-      `https://shopee-ratings-variants.herokuapp.com/${shopId}/${productId}/${i}`
-    )
-      .then((response) => response.json())
-      .then((rawdata) => {
-        if (rawdata.length == 0) {
-          //when there no data end
-          //i=batchnum
-          //console.log(i)
-          return;
-        }
+              return Ratings;
+            }, {});
 
-        allRatings.push(...rawdata);
+            let dataset = Object.values(data);
+            let sourceNames = Object.keys(data);
 
-        data = allRatings.reduce(function (Ratings, rating) {
-          if (rating in Ratings) {
-            Ratings[rating]++;
-          } else {
-            Ratings[rating] = 1;
-          }
+            let newDataObj = [];
+            //create array object so it can be iterable during sorting
+            for (x = 0; x < dataset.length; x++) {
+              let newObj = {
+                name: sourceNames[x],
+                value: dataset[x],
+              };
+              newDataObj.push(newObj);
+            }
 
-          return Ratings;
-        }, {});
-        //console.log(data)
-        //labels: Object.keys(data)
-        let dataset = Object.values(data);
-        let sourceNames = Object.keys(data);
-        let mod = i % 2;
-
-        if (mod != 0) {
-          //Create SVG element
-          // xScale will help us set the x position of the bars
-
-          let xScale = d3.scaleBand().rangeRound([0, width]).padding(0.1),
-            yScale = d3.scaleLinear().rangeRound([height, 0]);
-
-          xScale.domain(sourceNames);
-          yScale.domain([
-            0,
-            d3.max(dataset, function (d) {
-              return d;
-            }),
-          ]);
-
-          d3.select("svg").remove();
-
-          svg = d3
-            .select("body")
-            .append("svg")
-            .attr("width", w)
-            .attr("height", h);
-          //const svg = d3.select("svg").attr("width", w).attr("height", h);
-          svg = svg
-            .append("g")
-            .attr(
-              "transform",
-              "translate(" + margin.left + "," + margin.top + ")"
-            );
-
-          /*          svg
-          .append("g")
-          .attr("class", "axis axis--x")
-          .attr("transform", "translate(0," + height + ")")
-         .call(d3.axisBottom(xScale)); 
-         
-
- */
-
-          svg
-            .append("g")
-            .attr("class", "axis axis--y")
-            .call(d3.axisLeft(yScale).ticks(5));
-
-          // Create rectangles
-          let bars = svg
-            .selectAll(".bar")
-            .data(sourceNames)
-            .enter()
-            .append("g");
-
-          bars
-            .append("rect")
-            .attr("class", "bar")
-            .attr("x", function (d) {
-              return xScale(d);
-            })
-            .attr("y", function (d) {
-              return yScale(data[d]);
-            })
-            .attr("width", xScale.bandwidth())
-            .attr("height", function (d) {
-              return height - yScale(data[d]);
+          
+            if(sortType=="asc"){
+              // sort by value
+            newDataObj.sort(function (a, b) {
+              return a.value - b.value;
             });
+            }
+            else if (sortType=="desc"){
+              // sort by value
+            newDataObj.sort(function (a, b) {
+              return b.value - a.value;
+            });
+            }
 
-          bars
-            .append("text")
-            .text(function (d) {
-              return data[d];
-            })
-            .attr("x", function (d) {
-              return xScale(d) + xScale.bandwidth() / 2;
-            })
-            .attr("y", function (d) {
-              return yScale(data[d]) - 5;
-            })
-            .attr("font-family", "sans-serif")
-            .attr("font-size", "12px")
-            .attr("fill", "black")
-            .attr("text-anchor", "middle");
+            //get the top items
+            let newTopObj=[]
+            if (topItems<11){
+              newTopObj=newDataObj.slice(0,topItems)
+              newDataObj=newTopObj
+            }
+            //get the sum
+            var sum = dataset.reduce(function (a, b) {
+              return a + b;
+            });
+            //console.log(sum)
 
-          bars
-            .append("text")
-            .text(function (d) {
-              //console.log(d)
-              return d;
-            })
-            .attr("transform", "translate(0," + width + "), rotate(270) ")
-            .attr("x", height)
-            .attr("y", function (d) {
-              return xScale(d) + xScale.bandwidth() / 2;
-            })
+            let mod = i % 2;
 
-            .attr("font-family", "sans-serif")
-            .attr("font-size", "14px")
-            .attr("fill", "black")
-            .attr("text-anchor", "end");
-        }
-        //console.log(i)
-        //console.log(data)
-      })
-      .catch(function (error) {
-        // if there's an error, log it
-        console.log(error);
-      });
-    // }, 300); // we're passing x
-  }
+            if (mod != 0) {
+              //Create SVG element
+              let yScale = d3.scaleLinear().rangeRound([height, 0]);
+              yScale.domain([
+                0,
+                d3.max(dataset, function (d) {
+                  return d;
+                }),
+              ]);
+
+              let xScale = d3
+                .scaleBand()
+                .domain(newDataObj.map((item) => item.name))
+                .rangeRound([0, width])
+                .padding(0.1);
+
+              d3.select("svg").remove();
+
+              svg = d3
+                .select("body")
+                .append("svg")
+                .attr("width", w)
+                .attr("height", h);
+              //const svg = d3.select("svg").attr("width", w).attr("height", h);
+              svg = svg
+                .append("g")
+                .attr(
+                  "transform",
+                  "translate(" + margin.left + "," + margin.top + ")"
+                );
+
+              svg
+                .append("g")
+                .attr("class", "axis axis--y")
+                .call(d3.axisLeft(yScale).ticks(5));
+
+              // Create rectangles
+              let bars = svg
+                .selectAll(".bar")
+                .data(newDataObj)
+                .enter()
+                .append("g")
+                .attr("class", "bars");
+
+              bars
+                .append("rect")
+                .attr("class", "bar")
+                .attr("x", function (d) {
+                  //console.log(xScale(d.name));
+                  return xScale(d.name);
+                })
+                .attr("y", function (d) {
+                  return yScale(d.value);
+                })
+                .attr("width", xScale.bandwidth())
+                .attr("height", function (d) {
+                  return height - yScale(d.value);
+                });
+
+              bars
+                .append("text")
+                .text(function (d) {
+                  return d.value;
+                })
+                .attr("x", function (d) {
+                  return xScale(d.name) + xScale.bandwidth() / 2;
+                })
+                .attr("y", function (d) {
+                  return yScale(d.value) - 5;
+                })
+                .attr("font-family", "sans-serif")
+                .attr("font-size", "12px")
+                .attr("fill", "white")
+                .attr("text-anchor", "middle");
+
+              svg
+                .append("g")
+                .attr("transform", "translate(0," + height + ")") // This controls the rotate position of the Axis
+                .call(d3.axisBottom(xScale))
+                .selectAll("text")
+                .attr("transform", "translate(-10,10)rotate(-90)")
+                .style("text-anchor", "end")
+                .style("font-size", "1.15em")
+                .style("fill", "white");
+            }
+
+          })
+          .catch(function (error) {
+            // if there's an error, log it
+            console.log(error);
+          });
+
+        // }, 300); // we're passing x
+      }
+      //
+      //return 0
+    });
 }
 
-
-function showModal() {
-  let modalHelp = document.getElementById("modal-help")
-  modalHelp.style.display="block"
+function showLoadingModal() {
+  let modalHelp = document.getElementById("modal-loading");
+  modalHelp.style.display = "block";
 }
-
-/**working
-       xScale = d3
-            .scaleBand() //Ordinal scale
-            .domain(d3.range(dataset.length)) //sets the input domain for the scale
-            .rangeRound([0, w]) //enables rounding of the range
-            .paddingInner(0.05); //spacing between each bar
-
-          yScale = d3
-            .scaleLinear()
-            .domain([0, d3.max(dataset)]) //sets the upper end of the input domain to the largest data value in dataset
-            .range([0, h]); 
-     * 
-     *  //Create SVG element
-          // xScale will help us set the x position of the bars
-          xScale = d3
-            .scaleBand() //Ordinal scale
-            .domain(d3.range(dataset.length)) //sets the input domain for the scale
-            .rangeRound([0, w]) //enables rounding of the range
-            .paddingInner(0.05); //spacing between each bar
-
-          yScale = d3
-            .scaleLinear()
-            .domain([0, d3.max(dataset)]) //sets the upper end of the input domain to the largest data value in dataset
-            .range([0, h]);
-
-          //console.log(dataset.length)
-          //d3.select('body').html("")
-          d3.select("svg").remove();
-          svg = d3
-            .select("body")
-            .append("svg")
-            .attr("width", w)
-            .attr("height", h);
-          //const svg = d3.select("svg").attr("width", w).attr("height", h);
-
-          //Create bars
-          svg
-            .selectAll("rect")
-            .data(dataset)
-            .enter()
-            .append("rect")
-            .attr("width", 0) //start width
-            .attr("height", 0) //start height
-            .attr("x", function (d, i) {
-              // position in x-axis
-              return xScale(i); // we will pass the values from the dataset
-            })
-            .attr("y", function (d) {
-              return h - yScale(d);
-            })
-            .attr("width", xScale.bandwidth()) //Asks for the bandwith of the scale
-            .attr("height", function (d) {
-              return yScale(d);
-            })
-            .attr("fill", function (d) {
-              return (
-                "rgb(" + Math.round(d * 8) + ",0," + Math.round(d * 10*(i+5)) + ")"
-              ); //Change the color of the bar depending on the value
-            });
-     */
+function hideLoadingModal() {
+  let modalHelp = document.getElementById("modal-loading");
+  modalHelp.style.display = "none";
+}

@@ -48,24 +48,33 @@
       <label id="headerTitle">Shopee Shop Rating Scraper</label>
     </div>
     <div id="div-showhelp">
-      <button id="btnHelp" onclick="showModal()">How to use</button>
+      <button id="btnHelp" >How to use</button>
     </div>
     
   </div>
   <br>
   <form  onsubmit="plotData();return false">
-    <input type="url" id="url" style="width: 80%;" required placeholder="Paste the link here"/>
+    <input type="url" id="url" style="width: 70%;" required placeholder="Paste the link here"/>
+    <select id="sortType" name="sortType">
+      <option value="no">Default</option>
+      <option value="asc">Ascending</option>
+      <option value="desc">Descending</option>     
+    </select>
+    <input type="number" id="top" placeholder="Top Sold" min="3" max="10"/>
     <!-- <input type="number" max="500" style="width: 10%;" required placeholder="No. of batch"> -->
     <input type="submit" id="btnPlot" value="Plot Data" style="width: 10%;"/>
   </form>
 </div>
 
+<div id="bar-chart">
   <svg>
 
   </svg> 
  
-  <div id="modal-help">
-     This is modal
+</div>
+
+  <div id="modal-loading">
+     Extracting Data......
   </div>
   
 </body>
