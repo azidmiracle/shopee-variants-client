@@ -13,3 +13,6 @@ Three Features:
 1. Can be sorted in descending order or ascending order.
 2. Can trim the data from 3 to 10 displays of items.
 3. Can be used in different country like Singapore, Philippines, etc.
+
+
+Try the app in this site: https://shopee-ratings-webscraper.web.app/
