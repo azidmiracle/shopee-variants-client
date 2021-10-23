@@ -9,7 +9,7 @@ The data is fetched from the shopee variant server api https://shopee-ratings-va
 
 Then it is manipulated so it can be display in a bar chart using D3.JS
 
-3 Features
+Three Features:
 1. Can be sorted in descending order or ascending order.
 2. Can trim the data from 3 to 10 displays of items.
 3. Can be used in different country like Singapore, Philippines, etc.
