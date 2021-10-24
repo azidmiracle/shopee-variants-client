@@ -38,29 +38,29 @@
   <script type="text/javascript" src="js/index.js"></script>
   <!-- Load d3.js
     <script src="https://d3js.org/d3.v4.js"></script> -->
-  <title>Shopee Shop Rating Scraper</title>
+  <title>Shopee Shop Variants Scraper</title>
 </head>
 
 <body>
 <div>
   <div id="header">
     <div id="div-header">
-      <label id="headerTitle">Shopee Shop Rating Scraper</label>
+      <label id="headerTitle">Shopee Shop Variants Scraper</label>
     </div>
     <div id="div-showhelp">
-      <button id="btnHelp" >How to use</button>
+      <button id="btnHelp" onclick='window.open("https://www.youtube.com/watch?v=xZsmlpNHEDo", "_blank");'>How to use</button>
     </div>
     
   </div>
   <br>
   <form  onsubmit="plotData();return false">
-    <input type="url" id="url" style="width: 70%;" required placeholder="Paste the link here"/>
+    <input type="url" id="url" style="width: 70%;" required placeholder="Paste the link here" />
     <select id="sortType" name="sortType">
       <option value="no">Default</option>
       <option value="asc">Ascending</option>
       <option value="desc">Descending</option>     
     </select>
-    <input type="number" id="top" placeholder="Top Sold" min="3" max="10"/>
+    <input type="number" id="top" placeholder="Top Most/Least" min="3" max="10"/>
     <!-- <input type="number" max="500" style="width: 10%;" required placeholder="No. of batch"> -->
     <input type="submit" id="btnPlot" value="Plot Data" style="width: 10%;"/>
   </form>
