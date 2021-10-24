@@ -13,7 +13,7 @@ function plotData() {
   let topItems = Number(txtTop.value);
   let sortType = dropSort.value;
 
-  let startChar = url.search(/-i\./) + 3;  //earch the "i-, so we would know where the shope id started"
+  let startChar = url.search(/-i\./) + 3;  //search the "i-, so we would know where the shope id started"
   let endChar = startChar.length;
   let spliceWord = url.slice(startChar, endChar);
 
