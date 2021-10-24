@@ -3,6 +3,8 @@
 let form = document.getElementById("plotGraphForm");
 
 function plotData() {
+  //document.location.reload(true)  
+  d3.select("svg").remove();
   //showLoadingModal()
   let txtUrl = document.getElementById("url");
   let txtTop = document.getElementById("top");
@@ -10,43 +12,53 @@ function plotData() {
   let url = txtUrl.value;
   let topItems = Number(txtTop.value);
   let sortType = dropSort.value;
-  let startChar = url.search("-i.") + 3;
+
+  let startChar = url.search(/-i\./) + 3;  //earch the "i-, so we would know where the shope id started"
   let endChar = startChar.length;
   let spliceWord = url.slice(startChar, endChar);
-  //split the splice word
-  let idArr = spliceWord.split(".");
 
-  let shopId = Number(idArr[0]);
-  let productId = Number(idArr[1]);
-  console.log(topItems);
+  //split the  word
+  let idArr = spliceWord.split(".");//split the shop id and item id
 
+  let shopId = Number(idArr[0]);//first index is the shop id
+  let productId = Number(idArr[1]);//second index in the item id
+
+  //check if what country
+  let startCharCntry = url.search(/shopee\./) + 7;  //find the word shopee.
+  let spliceWordCntry = url.slice(startCharCntry, startCharCntry+2); //get the two characters
+  console.log(spliceWordCntry)
+
+  //console.log(shopId);
+  //console.log(spliceWord);
   //fetch the number of ratings
   fetch(
-    `https://shopee-ratings-variants.herokuapp.com/count/${shopId}/${productId}/`
+    `https://shopee-ratings-variants.herokuapp.com/count/${shopId}/${productId}/${spliceWordCntry}`
   )
     .then((response) => response.json())
     .then((count) => {
-      let batchnum = Math.round(count / 50); // the limit per batch in the server is 50
-
+      let batchnum = Math.round(count / 40); // the limit per batch in the server is 40
+      
       let allRatings = [];
       let data = [];
+
+      //initialize the window ang graph size
       let w = window.innerWidth,
         h = window.innerHeight;
       let margin = { top: 20, right: 20, bottom: h / 2, left: 40 };
-
       let height = h - margin.top - margin.bottom,
         width = w - margin.left - margin.right;
 
       for (let i = 0; i < batchnum + 1; ++i) {
         //setTimeout(async function (y) {
         fetch(
-          `https://shopee-ratings-variants.herokuapp.com/ratings/${shopId}/${productId}/${i}`
+          `https://shopee-ratings-variants.herokuapp.com/ratings/${shopId}/${productId}/${i}/${spliceWordCntry}`//fetch the data from the server
         )
           .then((response) => response.json())
           .then((rawdata) => {
             allRatings.push(...rawdata);
             
             //create object
+            //reformat the data to return the number of counts for a distinct item
             data = allRatings.reduce(function (Ratings, rating) {
               if (rating in Ratings) {
                 Ratings[rating]++;
@@ -57,11 +69,13 @@ function plotData() {
               return Ratings;
             }, {});
 
-            let dataset = Object.values(data);
-            let sourceNames = Object.keys(data);
+            let dataset = Object.values(data);//the values is the count to be plotted in y-axis
+            let sourceNames = Object.keys(data);// the distinct item names for the x-axis
 
-            let newDataObj = [];
+
             //create array object so it can be iterable during sorting
+            //reformat the data
+            let newDataObj = [];
             for (x = 0; x < dataset.length; x++) {
               let newObj = {
                 name: sourceNames[x],
@@ -83,10 +97,10 @@ function plotData() {
               return b.value - a.value;
             });
             }
-
+            //console.log(newDataObj)
             //get the top items
             let newTopObj=[]
-            if (topItems<11){
+            if (topItems<11 && topItems>2 ){
               newTopObj=newDataObj.slice(0,topItems)
               newDataObj=newTopObj
             }
@@ -96,8 +110,8 @@ function plotData() {
             });
             //console.log(sum)
 
+            //this is just to skip the even number of iteration
             let mod = i % 2;
-
             if (mod != 0) {
               //Create SVG element
               let yScale = d3.scaleLinear().rangeRound([height, 0]);
@@ -187,7 +201,8 @@ function plotData() {
           })
           .catch(function (error) {
             // if there's an error, log it
-            console.log(error);
+            return 
+            //console.log(error);
           });
 
         // }, 300); // we're passing x
